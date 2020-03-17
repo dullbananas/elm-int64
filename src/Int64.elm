@@ -1,6 +1,6 @@
 module Int64 exposing
     ( Int64, fromInt, fromInt32s
-    , add, subtract
+    , add, subtract, multiply
     , and, or, xor, complement
     , shiftLeftBy, shiftRightZfBy, rotateLeftBy, rotateRightBy
     , signedCompare, unsignedCompare
@@ -180,6 +180,22 @@ subtract (Int64 a b) (Int64 p q) =
 
     else
         Int64 (Bitwise.shiftRightZfBy 0 higher) (Bitwise.shiftRightZfBy 0 lower)
+
+
+multiply : Int64 -> Int64 -> Int64
+multiply a b =
+    let
+        one : Int64
+        one =
+            fromInt 1
+        step : Int64 -> Int64 -> Int64 -> Int64
+        step x y z =
+            if z == one then
+                y
+            else
+                step x (add x y) (subtract z one)
+    in
+        step a a b
 
 
 
