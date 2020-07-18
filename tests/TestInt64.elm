@@ -142,10 +142,6 @@ fuzzTests =
             \a b ->
                 Int64.subtract (Int64.fromInt a) (Int64.fromInt b)
                     |> Expect.equal (Int64.fromInt (a - b))
-        , fuzz2 Fuzz.int Fuzz.int "multiplication" <|
-            \a b ->
-                Int64.multiply (Int64.fromInt a) (Int64.fromInt b)
-                    |> Expect.equal (Int64.fromInt (a * b))
         , fuzz Fuzz.int "from int to signed string" <|
             \a ->
                 a
