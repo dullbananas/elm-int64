@@ -148,6 +148,15 @@ fuzzTests =
                     |> Int64.fromInt
                     |> Int64.toSignedString
                     |> Expect.equal (String.fromInt a)
+        , fuzz Fuzz.int "binary string conversion" <|
+            \a ->
+                let
+                    int64 = Int64.fromInt a
+                in
+                    int64
+                        |> Int64.toBitString
+                        |> Int64.fromBitString
+                        |> Expect.equal (Just int64)
         , fuzz (Fuzz.map abs Fuzz.int) "from positive in to unsigned string" <|
             \a ->
                 a

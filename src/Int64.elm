@@ -6,6 +6,7 @@ module Int64 exposing
     , signedCompare, unsignedCompare
     , toSignedString, toUnsignedString
     , toHex, toBitString
+    , fromBitString
     , decoder, encoder
     , toByteValues, toBits
     )
@@ -39,6 +40,11 @@ This is a low-level package focussed on speed. The 64-bit integers are represent
 
 @docs toSignedString, toUnsignedString
 @docs toHex, toBitString
+
+
+## Conversion from String
+
+@docs fromBitString
 
 
 ## Conversion to Bytes
@@ -491,6 +497,65 @@ toBitString input =
                         String.cons '0' accum
             )
             ""
+
+
+{- Create an `Int64` from a string of `0`s and `1`s in big-endian order.
+
+    fromBitString "101"
+        --> fromInt 5
+-}
+fromBitString : String -> Maybe Int64
+fromBitString string =
+    string
+        |> bitsFromString
+        |> Maybe.map fromBits
+
+
+fromBits : List Bool -> Int64
+fromBits bits =
+    Int64
+        (Bitwise.shiftRightZfBy 0 <| fromBits32 <| List.drop 32 bits)
+        (Bitwise.shiftRightZfBy 0 <| fromBits32 <| List.take 32 bits)
+
+
+fromBits32 : List Bool -> Int
+fromBits32 =
+    Tuple.second << List.foldl
+        (\bit (i, accum) ->
+            ( i + 1
+            , if bit
+                then
+                    Bitwise.or
+                        accum
+                        (Bitwise.shiftLeftBy i 1)
+                else
+                    accum
+            )
+        )
+        (0, 0)
+
+
+-- Lowest bit is first
+bitsFromString : String -> Maybe (List Bool)
+bitsFromString =
+    String.foldl
+        (\b maybeAccum ->
+            case maybeAccum of
+                Nothing ->
+                    Nothing
+
+                Just accum ->
+                    case b of
+                        '1' ->
+                            Just <| True :: accum
+
+                        '0' ->
+                            Just <| False :: accum
+
+                        _ ->
+                            Nothing
+        )
+        (Just [])
 
 
 {-| Interpret a `Int64` as an unsigned integer, and give its string representation
